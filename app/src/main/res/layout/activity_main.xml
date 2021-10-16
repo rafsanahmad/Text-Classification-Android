@@ -4,15 +4,40 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="@dimen/tfe_tc_activity_margin"
     tools:context=".MainActivity">
 
-    <TextView
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/input_text"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/result_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </ScrollView>
+
+    <EditText
+        android:id="@+id/input_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/tfe_tc_edit_text_hint"
+        android:inputType="textNoSuggestions"
+        app:layout_constraintBaseline_toBaselineOf="@+id/predict_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/predict_button"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/predict_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:text="@string/tfe_tc_button_ok"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
