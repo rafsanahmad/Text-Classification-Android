@@ -3,7 +3,14 @@ package com.rafsan.text_classification
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.ml.modeldownloader.CustomModel
+import com.google.firebase.ml.modeldownloader.CustomModelDownloadConditions
+import com.google.firebase.ml.modeldownloader.DownloadType
+import com.google.firebase.ml.modeldownloader.FirebaseModelDownloader
+import com.google.firebase.perf.FirebasePerformance
+import com.google.firebase.perf.metrics.Trace
 import com.rafsan.text_classification.databinding.ActivityMainBinding
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -13,8 +20,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private var executorService: ExecutorService? = null
+    private lateinit var downloadTrace: Trace
+    private val firebasePerformance = FirebasePerformance.getInstance()
 
-    // TODO 5: Define a NLClassifier variable
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -27,8 +35,7 @@ class MainActivity : AppCompatActivity() {
                     binding.inputText.getText().toString()
                 )
             })
-
-        // TODO 3: Call the method to download TFLite model
+        setupTextClassifier()
     }
 
     /** Send input text to TextClassificationClient and get the classify messages.  */
@@ -61,5 +68,48 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // TODO 2: Implement a method to download TFLite model from Firebase
+    private fun setupTextClassifier() {
+        // Add these lines to create and start the trace
+        downloadTrace = firebasePerformance.newTrace("download_model")
+        downloadTrace.start()
+        downloadModel("sentiment_analysis")
+    }
+
+    private fun downloadModel(modelName: String) {
+        val conditions = CustomModelDownloadConditions.Builder()
+            .requireWifi()  // Also possible: .requireCharging() and .requireDeviceIdle()
+            .build()
+        FirebaseModelDownloader.getInstance()
+            .getModel(
+                modelName, DownloadType.LOCAL_MODEL_UPDATE_IN_BACKGROUND,
+                conditions
+            )
+            .addOnSuccessListener { model: CustomModel? ->
+                // Download complete. Depending on your app, you could enable the ML
+                // feature, or switch from the local model to the remote model, etc.
+
+                // The CustomModel object contains the local path of the model file,
+                // which you can use to instantiate a TensorFlow Lite interpreter.
+                val modelFile = model?.file
+                if (modelFile != null) {
+                    showToast("Downloaded remote model: $model")
+                    //var interpreter = Interpreter(modelFile)
+
+                    downloadTrace.stop()
+                } else {
+                    showToast("Failed to get model file.")
+                }
+            }
+            .addOnFailureListener {
+                showToast("Exception occurred in downloading model.")
+            }
+    }
+
+    private fun showToast(text: String) {
+        Toast.makeText(
+            this,
+            text,
+            Toast.LENGTH_LONG
+        ).show()
+    }
 }
