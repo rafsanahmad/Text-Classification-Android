@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /**
+  ~  * Created by Rafsan Ahmad on 10/17/21, 1:36 PM
+  ~  * Copyright (c) 2021 . All rights reserved.
+  ~  */
+  -->
+
 <resources>
     <dimen name="tfe_tc_activity_margin">16dp</dimen>
 </resources>

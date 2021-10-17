@@ -1,3 +1,10 @@
+/*
+ * *
+ *  * Created by Rafsan Ahmad on 10/17/21, 1:36 PM
+ *  * Copyright (c) 2021 . All rights reserved.
+ *
+ */
+
 package com.rafsan.text_classification
 
 import android.os.Bundle
@@ -12,8 +19,11 @@ import com.google.firebase.ml.modeldownloader.FirebaseModelDownloader
 import com.google.firebase.perf.FirebasePerformance
 import com.google.firebase.perf.metrics.Trace
 import com.rafsan.text_classification.databinding.ActivityMainBinding
+import org.tensorflow.lite.support.label.Category
+import org.tensorflow.lite.task.text.nlclassifier.NLClassifier
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "TextClassificationDemo"
@@ -22,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     private var executorService: ExecutorService? = null
     private lateinit var downloadTrace: Trace
     private val firebasePerformance = FirebasePerformance.getInstance()
+    private var textClassifier: NLClassifier? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,13 +53,27 @@ class MainActivity : AppCompatActivity() {
     private fun classify(text: String) {
         executorService?.execute {
 
-            // TODO 7: Run sentiment analysis on the input text
+            //Run sentiment analysis on the input text
+            textClassifier?.let { classifier ->
+                val results: List<Category> = classifier.classify(text)
+                //Convert the result to a human-readable text
+                var textToShow = "Input: $text\nOutput:\n"
+                for (i in results.indices) {
+                    val result: Category = results.get(i)
+                    var expression = "Positive"
+                    if (result.label == "0") {
+                        expression = "Negative"
+                    }
+                    textToShow += String.format(
+                        "    %s: %s\n", expression,
+                        result.score
+                    )
+                }
+                textToShow += "---------\n"
 
-            // TODO 8: Convert the result to a human-readable text
-            val textToShow = "Text classification result.\n"
-
-            // Show classification result on screen
-            showResult(textToShow)
+                // Show classification result on screen
+                showResult(textToShow)
+            }
         }
     }
 
@@ -94,14 +119,17 @@ class MainActivity : AppCompatActivity() {
                 if (modelFile != null) {
                     showToast("Downloaded remote model: $model")
                     //var interpreter = Interpreter(modelFile)
-
+                    textClassifier = NLClassifier.createFromFile(modelFile);
+                    binding.predictButton.isEnabled = true
                     downloadTrace.stop()
                 } else {
                     showToast("Failed to get model file.")
                 }
             }
-            .addOnFailureListener {
+            .addOnFailureListener { it ->
                 showToast("Exception occurred in downloading model.")
+                Log.e(TAG, it.localizedMessage)
+                binding.predictButton.isEnabled = false
             }
     }
 

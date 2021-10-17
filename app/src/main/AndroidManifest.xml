@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /**
+  ~  * Created by Rafsan Ahmad on 10/17/21, 1:36 PM
+  ~  * Copyright (c) 2021 . All rights reserved.
+  ~  */
+  -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.rafsan.text_classification">
 
